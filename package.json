@@ -1,0 +1,8 @@
+{
+  "name": "zyoin-recruitment-dashboard",
+  "version": "1.0.0",
+  "description": "Zyoin AI-powered recruitment dashboard with Groq chatbot",
+  "engines": {
+    "node": ">=18"
+  }
+}

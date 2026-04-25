@@ -1,0 +1,641 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Zyoin — Recruitment Dashboard</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"/>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet"/>
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --bg: #0f0f11;
+    --surface: #18181c;
+    --surface2: #212127;
+    --border: rgba(255,255,255,0.07);
+    --border2: rgba(255,255,255,0.12);
+    --text: #e8e8ec;
+    --text2: #888894;
+    --text3: #555560;
+    --accent: #7c6fff;
+    --accent2: #a594ff;
+    --green: #3ecf8e;
+    --amber: #f5a623;
+    --coral: #ff6b6b;
+    --teal: #38bdf8;
+    --font: 'DM Sans', system-ui, sans-serif;
+    --mono: 'DM Mono', monospace;
+    --radius: 12px;
+  }
+
+  body { font-family: var(--font); background: var(--bg); color: var(--text); min-height: 100vh; font-size: 14px; line-height: 1.5; }
+
+  .shell { max-width: 1200px; margin: 0 auto; padding: 28px 24px 80px; }
+
+  /* ── Topbar ── */
+  .topbar { display: flex; align-items: center; justify-content: space-between; margin-bottom: 32px; flex-wrap: wrap; gap: 14px; }
+  .wordmark { display: flex; align-items: baseline; gap: 6px; }
+  .wordmark-logo { font-size: 22px; font-weight: 600; letter-spacing: -1px; color: var(--accent2); }
+  .wordmark-sub { font-size: 13px; color: var(--text3); font-weight: 400; letter-spacing: 0.04em; }
+  .topbar-right { display: flex; align-items: center; gap: 10px; }
+  .qlabel { font-size: 12px; color: var(--text3); margin-right: 4px; }
+  .q-pills { display: flex; background: var(--surface); border: 1px solid var(--border); border-radius: 30px; padding: 3px; }
+  .q-pill { padding: 6px 18px; border-radius: 24px; border: none; background: transparent; color: var(--text2); font-family: var(--font); font-size: 13px; font-weight: 500; cursor: pointer; transition: all .2s; }
+  .q-pill.active { background: var(--accent); color: #fff; }
+
+  /* ── KPI ── */
+  .kpi-row { display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; margin-bottom: 24px; }
+  .kpi { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); padding: 18px 20px; position: relative; overflow: hidden; transition: border-color .2s; }
+  .kpi:hover { border-color: var(--border2); }
+  .kpi-accent { position: absolute; top: 0; left: 0; right: 0; height: 2px; }
+  .kpi-label { font-size: 11px; color: var(--text3); text-transform: uppercase; letter-spacing: .06em; margin-bottom: 8px; font-weight: 500; }
+  .kpi-num { font-size: 32px; font-weight: 300; line-height: 1; font-family: var(--mono); }
+  .kpi-delta { font-size: 12px; margin-top: 6px; display: flex; align-items: center; gap: 4px; }
+  .delta-up { color: var(--green); } .delta-dn { color: var(--coral); }
+
+  /* ── Section ── */
+  .section-head { display: flex; align-items: center; justify-content: space-between; margin-bottom: 14px; gap: 12px; flex-wrap: wrap; }
+  .section-label { font-size: 11px; text-transform: uppercase; letter-spacing: .08em; color: var(--text3); font-weight: 500; }
+
+  /* ── BU tabs ── */
+  .bu-tabs { display: flex; gap: 6px; flex-wrap: wrap; }
+  .bu-tab { padding: 5px 14px; border-radius: 20px; border: 1px solid var(--border); background: transparent; color: var(--text2); font-family: var(--font); font-size: 12px; font-weight: 500; cursor: pointer; transition: all .15s; }
+  .bu-tab:hover { border-color: var(--border2); color: var(--text); }
+  .bu-tab.active { border-color: transparent; }
+
+  /* ── Card / Grid ── */
+  .card { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); padding: 22px 24px; }
+  .card + .card, .card + .grid2 { margin-top: 16px; }
+  .grid2 { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-bottom: 16px; }
+
+  /* ── Funnel ── */
+  .funnel-stage { display: flex; align-items: center; gap: 12px; margin-bottom: 12px; }
+  .stage-lbl { font-size: 12px; color: var(--text2); width: 76px; text-align: right; flex-shrink: 0; }
+  .stage-track { flex: 1; height: 38px; background: var(--surface2); border-radius: 6px; overflow: hidden; }
+  .stage-fill { height: 100%; border-radius: 6px; display: flex; align-items: center; padding: 0 12px; transition: width .55s cubic-bezier(.4,0,.2,1); }
+  .stage-count { font-family: var(--mono); font-size: 13px; font-weight: 500; }
+  .stage-pct { font-size: 12px; color: var(--text3); width: 44px; text-align: right; flex-shrink: 0; }
+  .funnel-legend { display: flex; gap: 16px; flex-wrap: wrap; margin-bottom: 16px; }
+  .fleg { display: flex; align-items: center; gap: 6px; font-size: 12px; color: var(--text2); }
+  .fleg-dot { width: 8px; height: 8px; border-radius: 2px; }
+
+  /* ── Comparison bars ── */
+  .cbar-group { margin-bottom: 16px; }
+  .cbar-name { font-size: 12px; font-weight: 500; margin-bottom: 6px; color: var(--text); }
+  .cbar-row { display: flex; align-items: center; gap: 8px; margin-bottom: 4px; }
+  .cbar-qlabel { font-size: 11px; color: var(--text3); width: 26px; flex-shrink: 0; }
+  .cbar-track { flex: 1; height: 22px; background: var(--surface2); border-radius: 4px; overflow: hidden; }
+  .cbar-fill { height: 100%; border-radius: 4px; display: flex; align-items: center; padding-left: 8px; transition: width .4s ease; }
+  .cbar-val { font-size: 11px; font-family: var(--mono); font-weight: 500; }
+
+  /* ── Offer rate ── */
+  .rate-row { margin-bottom: 14px; }
+  .rate-top { display: flex; justify-content: space-between; margin-bottom: 5px; }
+  .rate-name { font-size: 12px; font-weight: 500; }
+  .rate-info { font-size: 12px; color: var(--text2); font-family: var(--mono); }
+  .rate-track { height: 26px; background: var(--surface2); border-radius: 5px; overflow: hidden; }
+  .rate-fill { height: 100%; border-radius: 5px; display: flex; align-items: center; padding-left: 10px; transition: width .5s ease; }
+  .rate-pct { font-size: 12px; font-family: var(--mono); font-weight: 500; }
+
+  /* ── Table ── */
+  .tbl-wrap { overflow-x: auto; }
+  table { width: 100%; border-collapse: collapse; min-width: 600px; }
+  thead th { text-align: left; padding: 10px 12px; font-size: 11px; font-weight: 500; color: var(--text3); text-transform: uppercase; letter-spacing: .06em; border-bottom: 1px solid var(--border); }
+  tbody td { padding: 11px 12px; border-bottom: 1px solid var(--border); transition: background .1s; }
+  tbody tr:last-child td { border-bottom: none; }
+  tbody tr:hover td { background: var(--surface2); }
+  .rec-name { font-weight: 500; color: var(--text); }
+  .badge { display: inline-block; padding: 3px 9px; border-radius: 4px; font-size: 11px; font-weight: 500; }
+  .b-product { background: rgba(124,111,255,.18); color: var(--accent2); }
+  .b-gcc { background: rgba(62,207,142,.15); color: var(--green); }
+  .b-rpo { background: rgba(245,166,35,.15); color: var(--amber); }
+  .conv-pill { display: inline-block; padding: 3px 9px; border-radius: 4px; font-size: 11px; font-family: var(--mono); font-weight: 500; }
+  .conv-hi { background: rgba(62,207,142,.15); color: var(--green); }
+  .conv-md { background: rgba(245,166,35,.15); color: var(--amber); }
+  .conv-lo { background: rgba(255,107,107,.15); color: var(--coral); }
+  .num { font-family: var(--mono); font-size: 13px; }
+  .footnote { font-size: 11px; color: var(--text3); margin-top: 32px; text-align: center; }
+
+  @media (max-width: 700px) {
+    .kpi-row { grid-template-columns: repeat(2, 1fr); }
+    .grid2 { grid-template-columns: 1fr; }
+    .stage-lbl { width: 56px; font-size: 11px; }
+  }
+
+  /* ══════════════════════════════════
+     AI CHATBOT — Floating Panel
+  ══════════════════════════════════ */
+  #ai-fab {
+    position: fixed; bottom: 28px; right: 28px;
+    width: 52px; height: 52px; border-radius: 50%;
+    background: var(--accent); border: none; cursor: pointer;
+    display: flex; align-items: center; justify-content: center;
+    z-index: 1000;
+    box-shadow: 0 4px 24px rgba(124,111,255,0.45);
+    transition: transform .2s, box-shadow .2s;
+  }
+  #ai-fab:hover { transform: scale(1.08); box-shadow: 0 6px 30px rgba(124,111,255,0.6); }
+  #ai-fab svg { width: 22px; height: 22px; fill: #fff; }
+  #ai-fab .fab-close { display: none; }
+  #ai-fab.open .fab-open { display: none; }
+  #ai-fab.open .fab-close { display: block; }
+  #ai-fab::before {
+    content: ''; position: absolute; inset: -4px; border-radius: 50%;
+    border: 1.5px solid rgba(124,111,255,0.4);
+    animation: pulse-ring 2.4s ease-out infinite;
+  }
+  @keyframes pulse-ring { 0%{transform:scale(1);opacity:.6} 100%{transform:scale(1.5);opacity:0} }
+
+  #ai-fab-label {
+    position: fixed; bottom: 36px; right: 90px;
+    background: var(--surface); border: 1px solid var(--border2);
+    color: var(--text); font-family: var(--font);
+    font-size: 12px; font-weight: 500;
+    padding: 6px 12px; border-radius: 8px;
+    pointer-events: none; z-index: 999; white-space: nowrap;
+    opacity: 1; transition: opacity .3s;
+  }
+  #ai-fab-label.hidden { opacity: 0; }
+
+  /* Powered-by badge inside panel */
+  .powered-by {
+    font-size: 10px; color: var(--text3);
+    display: flex; align-items: center; gap: 4px;
+    margin-left: auto;
+  }
+  .powered-by span { color: #f97316; font-weight: 600; }
+
+  #chat-panel {
+    position: fixed; bottom: 92px; right: 28px;
+    width: 390px; height: 560px;
+    background: var(--surface); border: 1px solid var(--border2);
+    border-radius: 16px; display: flex; flex-direction: column;
+    z-index: 999; overflow: hidden;
+    box-shadow: 0 20px 60px rgba(0,0,0,0.5);
+    transform: scale(0.92) translateY(12px);
+    opacity: 0; pointer-events: none;
+    transition: transform .25s cubic-bezier(.4,0,.2,1), opacity .25s;
+    transform-origin: bottom right;
+  }
+  #chat-panel.open { transform: scale(1) translateY(0); opacity: 1; pointer-events: all; }
+
+  .cp-header {
+    padding: 14px 16px; border-bottom: 1px solid var(--border);
+    display: flex; align-items: center; gap: 10px; flex-shrink: 0;
+    background: var(--surface2);
+  }
+  .cp-av {
+    width: 32px; height: 32px; border-radius: 50%;
+    background: linear-gradient(135deg, var(--accent), #a594ff);
+    display: flex; align-items: center; justify-content: center;
+    flex-shrink: 0; font-size: 15px;
+  }
+  .cp-title { font-size: 13px; font-weight: 500; color: var(--text); }
+  .cp-sub { font-size: 11px; color: var(--text3); }
+  .cp-online { width: 7px; height: 7px; border-radius: 50%; background: var(--green); box-shadow: 0 0 6px var(--green); }
+
+  .cp-msgs {
+    flex: 1; overflow-y: auto; padding: 14px;
+    display: flex; flex-direction: column; gap: 10px; scroll-behavior: smooth;
+  }
+  .cp-msgs::-webkit-scrollbar { width: 4px; }
+  .cp-msgs::-webkit-scrollbar-thumb { background: var(--border2); border-radius: 4px; }
+
+  .cm { display: flex; gap: 7px; max-width: 92%; }
+  .cm.user { align-self: flex-end; flex-direction: row-reverse; }
+  .cm.bot  { align-self: flex-start; }
+  .cm-av { width: 26px; height: 26px; border-radius: 50%; flex-shrink: 0; display: flex; align-items: center; justify-content: center; font-size: 12px; margin-top: 1px; }
+  .cm.bot  .cm-av { background: linear-gradient(135deg, var(--accent), #a594ff); }
+  .cm.user .cm-av { background: var(--surface2); border: 1px solid var(--border2); color: var(--text3); font-size: 10px; }
+  .cm-bubble { padding: 9px 13px; border-radius: 12px; font-size: 12.5px; line-height: 1.58; }
+  .cm.bot  .cm-bubble { background: var(--surface2); color: var(--text); border-radius: 3px 12px 12px 12px; border: 1px solid var(--border); }
+  .cm.user .cm-bubble { background: var(--accent); color: #fff; border-radius: 12px 3px 12px 12px; }
+  .cm-bubble b { font-weight: 500; }
+  .cm-bubble code { font-family: var(--mono); font-size: 11px; background: rgba(255,255,255,0.08); padding: 1px 5px; border-radius: 3px; }
+
+  /* Error bubble */
+  .cm-bubble.error { border-color: rgba(255,107,107,0.3); color: var(--coral); }
+
+  .typing-dots { display: flex; gap: 4px; align-items: center; padding: 6px 2px; }
+  .typing-dots span { width: 5px; height: 5px; border-radius: 50%; background: var(--text3); display: inline-block; animation: td .9s infinite; }
+  .typing-dots span:nth-child(2) { animation-delay: .15s; }
+  .typing-dots span:nth-child(3) { animation-delay: .3s; }
+  @keyframes td { 0%,60%,100%{opacity:.2;transform:scale(1)} 30%{opacity:1;transform:scale(1.3)} }
+
+  .cp-sugs { padding: 0 10px 8px; display: flex; gap: 5px; flex-wrap: wrap; flex-shrink: 0; }
+  .cp-sug {
+    padding: 5px 11px; border-radius: 16px;
+    border: 1px solid var(--border2); background: transparent;
+    color: var(--text2); font-family: var(--font); font-size: 11px;
+    cursor: pointer; transition: all .15s; white-space: nowrap;
+  }
+  .cp-sug:hover { border-color: var(--accent); color: var(--accent2); background: rgba(124,111,255,0.08); }
+
+  .cp-input-row { padding: 10px 12px; border-top: 1px solid var(--border); display: flex; gap: 8px; flex-shrink: 0; }
+  .cp-input {
+    flex: 1; background: var(--surface2); border: 1px solid var(--border2);
+    border-radius: 20px; padding: 8px 14px; font-size: 12.5px;
+    color: var(--text); font-family: var(--font); outline: none; transition: border-color .15s;
+  }
+  .cp-input:focus { border-color: var(--accent); }
+  .cp-input::placeholder { color: var(--text3); }
+  .cp-send {
+    width: 34px; height: 34px; border-radius: 50%;
+    background: var(--accent); border: none; cursor: pointer;
+    display: flex; align-items: center; justify-content: center;
+    flex-shrink: 0; transition: opacity .15s;
+  }
+  .cp-send:hover { opacity: .85; }
+  .cp-send:disabled { opacity: .3; cursor: default; }
+  .cp-send svg { width: 15px; height: 15px; fill: #fff; }
+
+  @media (max-width: 480px) {
+    #chat-panel { width: calc(100vw - 20px); right: 10px; bottom: 80px; }
+    #ai-fab { bottom: 16px; right: 16px; }
+    #ai-fab-label { right: 76px; bottom: 24px; }
+  }
+</style>
+</head>
+<body>
+
+<!-- ═══════════════════════ DASHBOARD ═══════════════════════ -->
+<div class="shell">
+  <div class="topbar">
+    <div class="wordmark">
+      <div class="wordmark-logo">Zyoin</div>
+      <div class="wordmark-sub">Recruitment Intelligence</div>
+    </div>
+    <div class="topbar-right">
+      <span class="qlabel">Period</span>
+      <div class="q-pills">
+        <button class="q-pill active" onclick="setQ('Q3')">Q3 2024</button>
+        <button class="q-pill" onclick="setQ('Q4')">Q4 2024</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="kpi-row" id="kpi-row"></div>
+
+  <div class="card" style="margin-bottom:16px">
+    <div class="section-head">
+      <span class="section-label">Hiring funnel</span>
+      <div class="bu-tabs" id="bu-tabs">
+        <button class="bu-tab active" onclick="setBU('All')">All BUs</button>
+        <button class="bu-tab" onclick="setBU('Product')">Product</button>
+        <button class="bu-tab" onclick="setBU('GCC')">GCC</button>
+        <button class="bu-tab" onclick="setBU('RPO')">RPO</button>
+      </div>
+    </div>
+    <div class="funnel-legend" id="funnel-legend"></div>
+    <div id="funnel-stages"></div>
+  </div>
+
+  <div class="grid2">
+    <div class="card">
+      <div class="section-head"><span class="section-label">Profiles shared — Q3 vs Q4</span></div>
+      <div id="profiles-chart"></div>
+    </div>
+    <div class="card">
+      <div class="section-head"><span class="section-label">Offer → Joiner rate</span></div>
+      <div id="offer-rate-chart"></div>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="section-head">
+      <span class="section-label">Recruiter performance — <span id="table-q-label">Q3 2024</span></span>
+    </div>
+    <div class="tbl-wrap">
+      <table>
+        <thead>
+          <tr>
+            <th>Recruiter</th><th>BU</th><th>Profiles</th><th>Interviews</th>
+            <th>Offers</th><th>Joiners</th><th>Conversion</th><th>QoQ</th>
+          </tr>
+        </thead>
+        <tbody id="rec-tbody"></tbody>
+      </table>
+    </div>
+  </div>
+
+  <div class="footnote">Data is illustrative — update <code>DATA</code> in the script to use real pipeline figures &nbsp;·&nbsp; Zyoin Internal Use Only</div>
+</div>
+
+<!-- ═══════════════════════ CHATBOT FAB ═══════════════════════ -->
+<div id="ai-fab-label">✦ Ask AI</div>
+
+<button id="ai-fab" onclick="toggleChat()" title="Ask Zyoin AI">
+  <svg class="fab-open" viewBox="0 0 24 24"><path d="M12 2l2.09 6.26L20 10l-5.91 1.74L12 18l-2.09-6.26L4 10l5.91-1.74z"/></svg>
+  <svg class="fab-close" viewBox="0 0 24 24"><path d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/></svg>
+</button>
+
+<div id="chat-panel">
+  <div class="cp-header">
+    <div class="cp-av">✦</div>
+    <div>
+      <div class="cp-title">Zyoin AI Assistant</div>
+      <div class="cp-sub">Pipeline intelligence</div>
+    </div>
+    <div class="cp-online"></div>
+    
+  </div>
+
+  <div class="cp-msgs" id="cp-msgs"></div>
+
+  <div class="cp-sugs" id="cp-sugs">
+    <button class="cp-sug" onclick="askAI('Which BU had the best offer-to-joiner ratio in Q4?')">Best offer ratio?</button>
+    <button class="cp-sug" onclick="askAI('Who is the top performing recruiter overall?')">Top recruiter?</button>
+    <button class="cp-sug" onclick="askAI('Summarise Q3 vs Q4 performance across all BUs')">Q3 vs Q4 summary</button>
+    <button class="cp-sug" onclick="askAI('Which BU has the weakest funnel and why?')">Weakest funnel?</button>
+    <button class="cp-sug" onclick="askAI('Give me 3 actionable hiring recommendations')">Recommendations</button>
+  </div>
+
+  <div class="cp-input-row">
+    <input class="cp-input" id="cp-inp" type="text" placeholder="Ask about your pipeline…" onkeydown="if(event.key==='Enter')sendMsg()"/>
+    <button class="cp-send" id="cp-send" onclick="sendMsg()">
+      <svg viewBox="0 0 24 24"><path d="M2.01 21L23 12 2.01 3 2 10l15 2-15 2z"/></svg>
+    </button>
+  </div>
+</div>
+
+<script>
+/* ══════════════ DATA ══════════════ */
+const DATA = {
+  Q3: {
+    Product: { profiles: 210, interviews: 98,  offers: 42, joiners: 31 },
+    GCC:     { profiles: 340, interviews: 145, offers: 68, joiners: 54 },
+    RPO:     { profiles: 185, interviews: 72,  offers: 28, joiners: 19 },
+  },
+  Q4: {
+    Product: { profiles: 248, interviews: 120, offers: 55, joiners: 41 },
+    GCC:     { profiles: 390, interviews: 178, offers: 84, joiners: 68 },
+    RPO:     { profiles: 215, interviews: 88,  offers: 36, joiners: 26 },
+  }
+};
+const RECRUITERS = [
+  { name: 'Aditi Sharma',  bu: 'Product', Q3: { profiles: 72,  interviews: 34, offers: 15, joiners: 11 }, Q4: { profiles: 88,  interviews: 42, offers: 20, joiners: 15 } },
+  { name: 'Ravi Mehta',    bu: 'Product', Q3: { profiles: 68,  interviews: 31, offers: 13, joiners: 9  }, Q4: { profiles: 78,  interviews: 37, offers: 16, joiners: 12 } },
+  { name: 'Priya Nair',    bu: 'Product', Q3: { profiles: 70,  interviews: 33, offers: 14, joiners: 11 }, Q4: { profiles: 82,  interviews: 41, offers: 19, joiners: 14 } },
+  { name: 'Siddharth K.',  bu: 'GCC',     Q3: { profiles: 115, interviews: 48, offers: 23, joiners: 18 }, Q4: { profiles: 130, interviews: 59, offers: 28, joiners: 23 } },
+  { name: 'Meera Pillai',  bu: 'GCC',     Q3: { profiles: 118, interviews: 50, offers: 24, joiners: 19 }, Q4: { profiles: 135, interviews: 62, offers: 30, joiners: 24 } },
+  { name: 'Ankit Joshi',   bu: 'GCC',     Q3: { profiles: 107, interviews: 47, offers: 21, joiners: 17 }, Q4: { profiles: 125, interviews: 57, offers: 26, joiners: 21 } },
+  { name: 'Divya Menon',   bu: 'RPO',     Q3: { profiles: 93,  interviews: 36, offers: 14, joiners: 10 }, Q4: { profiles: 108, interviews: 44, offers: 18, joiners: 13 } },
+  { name: 'Kartik Rao',    bu: 'RPO',     Q3: { profiles: 92,  interviews: 36, offers: 14, joiners: 9  }, Q4: { profiles: 107, interviews: 44, offers: 18, joiners: 13 } },
+];
+const BU_COLOR = { Product: '#7c6fff', GCC: '#3ecf8e', RPO: '#f5a623' };
+const BU_BADGE = { Product: 'b-product', GCC: 'b-gcc', RPO: 'b-rpo' };
+const FUNNEL_LABELS = ['Profiles','Interviews','Offers','Joiners'];
+const FUNNEL_KEYS   = ['profiles','interviews','offers','joiners'];
+
+let currentQ = 'Q3', currentBU = 'All';
+const pct    = (a,b) => b ? Math.round(a/b*100) : 0;
+const delta  = (a,b) => b ? Math.round((a-b)/b*100) : 0;
+const sumAll = (q,k) => Object.values(DATA[q]).reduce((s,d)=>s+d[k],0);
+const prevQ  = q => q==='Q4'?'Q3':'Q4';
+
+function renderKPI() {
+  const q=currentQ,p=prevQ(q);
+  document.getElementById('kpi-row').innerHTML=[
+    {label:'Total profiles',key:'profiles',color:'#7c6fff'},
+    {label:'Interviews',key:'interviews',color:'#3ecf8e'},
+    {label:'Offers made',key:'offers',color:'#f5a623'},
+    {label:'Joiners',key:'joiners',color:'#38bdf8'},
+  ].map(d=>{
+    const val=sumAll(q,d.key),pv=sumAll(p,d.key),dv=delta(val,pv),up=dv>=0;
+    return `<div class="kpi"><div class="kpi-accent" style="background:${d.color}"></div>
+      <div class="kpi-label">${d.label}</div>
+      <div class="kpi-num" style="color:${d.color}">${val}</div>
+      <div class="kpi-delta ${up?'delta-up':'delta-dn'}">${up?'↑':'↓'} ${Math.abs(dv)}% vs ${p}</div></div>`;
+  }).join('');
+}
+
+function renderFunnel() {
+  const q=currentQ;
+  const bus=currentBU==='All'?['Product','GCC','RPO']:[currentBU];
+  const agg=FUNNEL_KEYS.map(k=>bus.reduce((s,bu)=>s+DATA[q][bu][k],0));
+  const max=agg[0]||1;
+  document.getElementById('funnel-legend').innerHTML=currentBU==='All'
+    ?bus.map(bu=>`<div class="fleg"><div class="fleg-dot" style="background:${BU_COLOR[bu]}"></div>${bu}</div>`).join(''):'';
+  let html='';
+  FUNNEL_LABELS.forEach((lbl,i)=>{
+    const w=pct(agg[i],max),drop=i===0?'—':pct(agg[i],agg[i-1])+'%';
+    if(currentBU==='All'){
+      const seg=bus.map(bu=>{const bv=DATA[q][bu][FUNNEL_KEYS[i]],sw=pct(bv,agg[i]);
+        return `<div style="height:100%;flex:${sw};background:${BU_COLOR[bu]};display:flex;align-items:center;padding:0 6px;min-width:${bv>0?'28px':'0'}">
+          <span style="font-family:var(--mono);font-size:12px;color:#fff;white-space:nowrap;overflow:hidden">${bv}</span></div>`;
+      }).join('');
+      html+=`<div class="funnel-stage"><div class="stage-lbl">${lbl}</div>
+        <div class="stage-track"><div style="height:100%;width:${w}%;display:flex;border-radius:6px;overflow:hidden;transition:width .55s cubic-bezier(.4,0,.2,1)">${seg}</div></div>
+        <div class="stage-pct">${drop}</div></div>`;
+    } else {
+      html+=`<div class="funnel-stage"><div class="stage-lbl">${lbl}</div>
+        <div class="stage-track"><div class="stage-fill" style="width:${w}%;background:${BU_COLOR[currentBU]}">
+          <span class="stage-count" style="color:#fff">${agg[i]}</span></div></div>
+        <div class="stage-pct">${drop}</div></div>`;
+    }
+  });
+  document.getElementById('funnel-stages').innerHTML=html;
+}
+
+function renderProfilesChart(){
+  const bus=['Product','GCC','RPO'];
+  const max=Math.max(...bus.map(bu=>Math.max(DATA.Q3[bu].profiles,DATA.Q4[bu].profiles)));
+  document.getElementById('profiles-chart').innerHTML=bus.map(bu=>{
+    const v3=DATA.Q3[bu].profiles,v4=DATA.Q4[bu].profiles;
+    return `<div class="cbar-group"><div class="cbar-name">${bu}</div>
+      <div class="cbar-row"><div class="cbar-qlabel">Q3</div><div class="cbar-track">
+        <div class="cbar-fill" style="width:${pct(v3,max)}%;background:${BU_COLOR[bu]}88">
+          <span class="cbar-val" style="color:#fff">${v3}</span></div></div></div>
+      <div class="cbar-row"><div class="cbar-qlabel">Q4</div><div class="cbar-track">
+        <div class="cbar-fill" style="width:${pct(v4,max)}%;background:${BU_COLOR[bu]}">
+          <span class="cbar-val" style="color:#fff">${v4}</span></div></div></div></div>`;
+  }).join('');
+}
+
+function renderOfferChart(){
+  document.getElementById('offer-rate-chart').innerHTML=['Product','GCC','RPO'].map(bu=>{
+    const d=DATA[currentQ][bu],r=pct(d.joiners,d.offers);
+    return `<div class="rate-row">
+      <div class="rate-top"><span class="rate-name">${bu}</span><span class="rate-info">${d.joiners}/${d.offers} accepted</span></div>
+      <div class="rate-track"><div class="rate-fill" style="width:${r}%;background:${BU_COLOR[bu]}">
+        <span class="rate-pct" style="color:#fff">${r}%</span></div></div></div>`;
+  }).join('');
+}
+
+function renderTable(){
+  const q=currentQ,p=prevQ(q);
+  document.getElementById('table-q-label').textContent=q+' 2024';
+  document.getElementById('rec-tbody').innerHTML=RECRUITERS.map(r=>{
+    const d=r[q],pd=r[p],rate=pct(d.joiners,d.profiles);
+    const rc=rate>=15?'conv-hi':rate>=10?'conv-md':'conv-lo';
+    const qoq=delta(d.profiles,pd.profiles);
+    return `<tr><td class="rec-name">${r.name}</td>
+      <td><span class="badge ${BU_BADGE[r.bu]}">${r.bu}</span></td>
+      <td class="num">${d.profiles}</td><td class="num">${d.interviews}</td>
+      <td class="num">${d.offers}</td><td class="num">${d.joiners}</td>
+      <td><span class="conv-pill ${rc}">${rate}%</span></td>
+      <td class="${qoq>=0?'delta-up':'delta-dn'}" style="font-size:12px;font-family:var(--mono)">${qoq>=0?'+':''}${qoq}%</td></tr>`;
+  }).join('');
+}
+
+function setQ(q){
+  currentQ=q;
+  document.querySelectorAll('.q-pill').forEach((b,i)=>b.classList.toggle('active',['Q3','Q4'][i]===q));
+  renderKPI();renderFunnel();renderOfferChart();renderTable();
+}
+function setBU(bu){
+  currentBU=bu;
+  const cols={All:'#7c6fff',Product:'#7c6fff',GCC:'#3ecf8e',RPO:'#f5a623'};
+  document.querySelectorAll('.bu-tab').forEach(b=>{
+    const a=b.textContent.trim()===bu;
+    b.classList.toggle('active',a);
+    b.style.background=a?cols[bu]:'';b.style.color=a?'#fff':'';
+  });
+  renderFunnel();
+}
+
+renderKPI();renderFunnel();renderProfilesChart();renderOfferChart();renderTable();
+document.querySelector('.bu-tab.active').style.background='#7c6fff';
+document.querySelector('.bu-tab.active').style.color='#fff';
+
+
+/* ══════════════ GROQ CHATBOT ══════════════
+   Calls /api/chat  →  Vercel serverless fn  →  Groq API
+   API key stays server-side, never in the browser.
+══════════════════════════════════════════ */
+const SYSTEM_PROMPT = `You are an expert recruitment analytics assistant for Zyoin, a tech-focused recruitment firm.
+You have full access to the following pipeline data:
+
+Q3 2024:
+- Product BU: 210 profiles, 98 interviews, 42 offers, 31 joiners
+- GCC BU: 340 profiles, 145 interviews, 68 offers, 54 joiners
+- RPO BU: 185 profiles, 72 interviews, 28 offers, 19 joiners
+- Total: 735 profiles, 315 interviews, 138 offers, 104 joiners
+
+Q4 2024:
+- Product BU: 248 profiles, 120 interviews, 55 offers, 41 joiners
+- GCC BU: 390 profiles, 178 interviews, 84 offers, 68 joiners
+- RPO BU: 215 profiles, 88 interviews, 36 offers, 26 joiners
+- Total: 853 profiles, 386 interviews, 175 offers, 135 joiners
+
+Recruiter data (Q3 → Q4):
+- Aditi Sharma (Product): 72→88 profiles, 34→42 interviews, 15→20 offers, 11→15 joiners
+- Ravi Mehta (Product): 68→78 profiles, 31→37 interviews, 13→16 offers, 9→12 joiners
+- Priya Nair (Product): 70→82 profiles, 33→41 interviews, 14→19 offers, 11→14 joiners
+- Siddharth K. (GCC): 115→130 profiles, 48→59 interviews, 23→28 offers, 18→23 joiners
+- Meera Pillai (GCC): 118→135 profiles, 50→62 interviews, 24→30 offers, 19→24 joiners
+- Ankit Joshi (GCC): 107→125 profiles, 47→57 interviews, 21→26 offers, 17→21 joiners
+- Divya Menon (RPO): 93→108 profiles, 36→44 interviews, 14→18 offers, 10→13 joiners
+- Kartik Rao (RPO): 92→107 profiles, 36→44 interviews, 14→18 offers, 9→13 joiners
+
+Key computed metrics:
+- Offer-to-joiner rate Q4: Product 75%, GCC 81%, RPO 72%
+- Offer-to-joiner rate Q3: Product 74%, GCC 79%, RPO 68%
+- Profile-to-joiner conversion Q4: Product 17%, GCC 17%, RPO 12%
+- QoQ growth in joiners: +30% overall
+- Top joiner count Q4: Meera Pillai (GCC) with 24 joiners
+- Highest profile volume Q4: GCC with 390
+
+Answer in 2-5 sentences. Be specific with numbers. Use **bold** for key figures. Add a brief insight where useful.`;
+
+// ── Proxy endpoint — change this if you rename the function ──
+const PROXY_URL = '/api/chat';
+
+let chatHistory = [];
+let chatBusy = false;
+
+function toggleChat() {
+  const panel=document.getElementById('chat-panel');
+  const fab=document.getElementById('ai-fab');
+  const isOpen=panel.classList.toggle('open');
+  fab.classList.toggle('open',isOpen);
+  document.getElementById('ai-fab-label').classList.add('hidden');
+  if(isOpen && chatHistory.length===0){
+    addBotMsg(`Hi! I'm your <b>Zyoin AI</b> What would you like to know?`);
+  }
+}
+
+function addBotMsg(html, isError=false) {
+  const msgs=document.getElementById('cp-msgs');
+  const div=document.createElement('div');
+  div.className='cm bot';
+  div.innerHTML=`<div class="cm-av">✦</div><div class="cm-bubble${isError?' error':''}">${html}</div>`;
+  msgs.appendChild(div);
+  msgs.scrollTop=msgs.scrollHeight;
+}
+
+function addUserMsg(text) {
+  const msgs=document.getElementById('cp-msgs');
+  const div=document.createElement('div');
+  div.className='cm user';
+  div.innerHTML=`<div class="cm-av">You</div><div class="cm-bubble">${text}</div>`;
+  msgs.appendChild(div);
+  msgs.scrollTop=msgs.scrollHeight;
+}
+
+function showTyping() {
+  const msgs=document.getElementById('cp-msgs');
+  const div=document.createElement('div');
+  div.className='cm bot';div.id='typing-ind';
+  div.innerHTML=`<div class="cm-av">✦</div><div class="cm-bubble"><div class="typing-dots"><span></span><span></span><span></span></div></div>`;
+  msgs.appendChild(div);msgs.scrollTop=msgs.scrollHeight;
+}
+function removeTyping(){const t=document.getElementById('typing-ind');if(t)t.remove();}
+
+function mdToHtml(text){
+  return text
+    .replace(/\*\*(.*?)\*\*/g,'<b>$1</b>')
+    .replace(/\*(.*?)\*/g,'<em>$1</em>')
+    .replace(/`(.*?)`/g,'<code>$1</code>')
+    .replace(/\n/g,'<br>');
+}
+
+async function askAI(text) {
+  if(chatBusy)return;
+  const panel=document.getElementById('chat-panel');
+  if(!panel.classList.contains('open'))toggleChat();
+  document.getElementById('cp-sugs').style.display='none';
+  document.getElementById('cp-inp').value='';
+  addUserMsg(text);
+  chatBusy=true;
+  document.getElementById('cp-send').disabled=true;
+  showTyping();
+  chatHistory.push({role:'user',content:text});
+
+  try {
+    const res = await fetch(PROXY_URL, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ messages: chatHistory, system: SYSTEM_PROMPT })
+    });
+    if(!res.ok){
+      const err=await res.json();
+      throw new Error(err.error || `HTTP ${res.status}`);
+    }
+    const data = await res.json();
+    const reply = data.reply || 'No response received.';
+    chatHistory.push({role:'assistant',content:reply});
+    removeTyping();
+    addBotMsg(mdToHtml(reply));
+  } catch(e) {
+    removeTyping();
+    addBotMsg(`⚠ ${e.message || 'Something went wrong. Please try again.'}`, true);
+    chatHistory.pop(); // remove failed user message from history
+  }
+
+  chatBusy=false;
+  document.getElementById('cp-send').disabled=false;
+}
+
+function sendMsg(){
+  const val=document.getElementById('cp-inp').value.trim();
+  if(!val||chatBusy)return;
+  document.getElementById('cp-inp').value='';
+  askAI(val);
+}
+
+setTimeout(()=>document.getElementById('ai-fab-label').classList.add('hidden'), 4000);
+</script>
+</body>
+</html>
