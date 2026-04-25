@@ -1,4 +1,4 @@
-# Zyoin Recruitment Dashboard — with Groq AI Chatbot
+# Zyoin Recruitment Dashboard with Chatbot
 
 An AI-powered recruitment pipeline dashboard for Zyoin.
 Built with vanilla HTML/CSS/JS + a Vercel serverless proxy for the Groq API.
